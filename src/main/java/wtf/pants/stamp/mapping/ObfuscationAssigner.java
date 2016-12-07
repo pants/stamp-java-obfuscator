@@ -1,0 +1,91 @@
+package wtf.pants.stamp.mapping;
+
+import wtf.pants.stamp.mapping.exceptions.ClassMapNotFoundException;
+import wtf.pants.stamp.mapping.obj.ClassMap;
+import wtf.pants.stamp.mapping.obj.MethodObj;
+import wtf.pants.stamp.util.Log;
+import wtf.pants.stamp.util.ObfUtil;
+
+/**
+ * @author Spacks
+ */
+public class ObfuscationAssigner {
+
+    private final ClassCollector collector;
+
+    public ObfuscationAssigner(ClassCollector cc) {
+        this.collector = cc;
+    }
+
+
+    private void obfuscateParentChild(ClassMap parentClass, ClassMap classObj) {
+        collector.getOverriddenMethods(parentClass, classObj).forEach((parentMethod, childMethod) -> {
+            if (!parentMethod.isObfuscated()) {
+                parentMethod.setObfMethodName(ObfUtil.getRandomObfString());
+            }
+
+            childMethod.setObfMethodName(parentMethod.getObfMethodName());
+            childMethod.setObfuscationDisable(false);
+
+            Log.log("Obfuscated Overridden Method: %s. Renamed to: %s", childMethod.getMethodName(), childMethod.getObfMethodName());
+        });
+    }
+
+    private void obfuscateInterfaceMethods(ClassMap classMap) {
+        classMap.getInterfaces().forEach(inter -> {
+            try {
+                ClassMap interfaceClass = collector.getClassMap(inter);
+                obfuscateParentChild(interfaceClass, classMap);
+            } catch (ClassMapNotFoundException e) {
+                classMap.methods.stream()
+                        .filter(methodObj -> !methodObj.isObfuscated())
+                        .forEach(m -> m.setObfuscationDisable(true));
+                Log.log("Interface class not found. Parent: %s", classMap.getClassName(), classMap.getParent());
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * Goes through the mapped classes and assigns an obfuscated name to each class
+     */
+    public void assignObfuscatedNames() {
+        collector.getClasses().stream().forEach(classObj -> {
+            if (classObj.hasParent()) {
+                try {
+                    ClassMap parentClass = collector.getParent(classObj);
+                    obfuscateParentChild(parentClass, classObj);
+                } catch (ClassMapNotFoundException e) {
+                    classObj.methods.stream()
+                            .filter(methodObj -> !methodObj.isObfuscated())
+                            .forEach(m -> m.setObfuscationDisable(true));
+
+                    Log.log("%s's parent class not found. Parent: %s", classObj.getClassName(), classObj.getParent());
+                }
+            }
+
+            if (classObj.hasImplementedClasses()) {
+                obfuscateInterfaceMethods(classObj);
+            }
+
+            classObj.getMethods().stream()
+                    .filter(m -> !m.isObfuscationDisable())
+                    .filter(m -> !m.isObfuscated())
+                    .filter(MethodObj::isSafeMethod)
+                    .forEach(m -> {
+                        m.setObfMethodName(ObfUtil.getRandomObfString());
+                        Log.log("Method: %s -> %s", m.getMethodName(), m.getObfMethodName());
+                    });
+
+            classObj.getFields().stream()
+                    .filter(f -> !f.isObfuscated())
+                    .forEach(f -> {
+                        f.setObfFieldName(ObfUtil.getRandomObfString());
+                        Log.log("Field: %s -> %s", f.getFieldName(), f.getObfFieldName());
+                    });
+
+            classObj.setObfClassName(ObfUtil.getRandomObfString());
+        });
+    }
+
+}
