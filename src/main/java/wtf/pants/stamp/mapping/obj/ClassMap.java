@@ -36,6 +36,14 @@ public class ClassMap {
         this.className = className;
     }
 
+    /**
+     * Gets the method from it's full path. eg:'this/is/a/pkg/Class.method()V'
+     * getMethodFromShort(String) for just the method name
+     *
+     * @param methodId Method path
+     * @return Returns the found MethodObj
+     * @throws MethodNotFoundException Throws if the method has not been mapped in this class
+     */
     public MethodObj getMethod(String methodId) throws MethodNotFoundException {
         Optional<MethodObj> methodObj = methods.stream().filter(m -> m.getFullMethod().equals(methodId)).findFirst();
 
@@ -45,6 +53,14 @@ public class ClassMap {
             throw new MethodNotFoundException(methodId);
     }
 
+    /**
+     * Gets a method from just the method name and desc
+     * getMethod(String) for the full name, package and class
+     *
+     * @param methodId Method name
+     * @return Returns the found MethodObj
+     * @throws MethodNotFoundException Throws if the method has not been mapped in this class
+     */
     public MethodObj getMethodFromShort(String methodId) throws MethodNotFoundException {
         Optional<MethodObj> methodObj = methods.stream().filter(m -> m.getMethod().equals(methodId)).findFirst();
 
@@ -63,11 +79,21 @@ public class ClassMap {
             return null;
     }
 
+    /**
+     * Adds a mapped field to the class
+     *
+     * @param fieldObj FieldObj instance
+     */
     public void addField(FieldObj fieldObj) {
         this.fields.add(fieldObj);
         Log.log("+ Added Field: %s", fieldObj.getFieldName());
     }
 
+    /**
+     * Adds a mapped method to the class
+     *
+     * @param methodObj MethodObj instance
+     */
     public void addMethod(MethodObj methodObj) {
         this.methods.add(methodObj);
         Log.log("+ Added Method: %s", methodObj.getFullMethod());

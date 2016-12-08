@@ -20,6 +20,11 @@ public class FieldObj {
         return pkg + "." + fieldName;
     }
 
+    /**
+     * Check to see if the method has had an obfuscated name assigned to it
+     *
+     * @return Returns true if the method has an obfuscated name set
+     */
     public boolean isObfuscated() {
         return obfFieldName != null;
     }

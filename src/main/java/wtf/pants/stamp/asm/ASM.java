@@ -39,7 +39,7 @@ public class ASM {
     }
 
     /**
-     * Pushes an int to the stack.
+     * Pushes the correct int to the stack.
      * 'ICONST_#' if it's less than 6
      * 'BIPUSH #' if it's -127 to -1, and 6 to 127
      * 'SIPUSH #' if it's anything else

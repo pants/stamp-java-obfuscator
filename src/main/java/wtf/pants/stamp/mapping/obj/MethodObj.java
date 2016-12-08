@@ -43,7 +43,7 @@ public class MethodObj {
     }
 
     /**
-     * Check to see if the method has been obfuscated
+     * Check to see if the method has had an obfuscated name assigned to it
      *
      * @return Returns true if the method has an obfuscated name set
      */
@@ -51,6 +51,12 @@ public class MethodObj {
         return obfMethodName != null;
     }
 
+    /**
+     * Checks if the method is 'safe'. If the method is a constructor or main method it should not be obfuscated
+     * and deemed unsafe for obfuscation.
+     *
+     * @return Returns true if the method is not a constructor or main method
+     */
     public boolean isSafeMethod() {
         return !(methodName.startsWith("<") //<init>, <clinit>
                 || (methodName.equals("main") && methodDesc.equals("([Ljava/lang/String;)V") && isStatic(access)));

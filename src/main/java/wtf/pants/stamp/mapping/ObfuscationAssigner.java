@@ -17,7 +17,12 @@ public class ObfuscationAssigner {
         this.collector = cc;
     }
 
-
+    /**
+     * Assigns obfuscated names to the overridden methods
+     *
+     * @param parentClass Parent Class
+     * @param classObj    Child Class
+     */
     private void obfuscateParentChild(ClassMap parentClass, ClassMap classObj) {
         collector.getOverriddenMethods(parentClass, classObj).forEach((parentMethod, childMethod) -> {
             if (!parentMethod.isObfuscated()) {
@@ -31,6 +36,12 @@ public class ObfuscationAssigner {
         });
     }
 
+    /**
+     * Obfuscates the implemented class' overridden methods. If the implemented class is not found it will disable the
+     * target class from being obfuscated. TODO: Remove the second sentence when libraries are done
+     *
+     * @param classMap Instance of ClassMap
+     */
     private void obfuscateInterfaceMethods(ClassMap classMap) {
         classMap.getInterfaces().forEach(inter -> {
             try {
@@ -47,7 +58,7 @@ public class ObfuscationAssigner {
     }
 
     /**
-     * Goes through the mapped classes and assigns an obfuscated name to each class
+     * Goes through the mapped classes and assigns an obfuscated name to each class for actually obfuscating
      */
     public void assignObfuscatedNames() {
         collector.getClasses().stream().forEach(classObj -> {

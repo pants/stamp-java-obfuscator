@@ -60,6 +60,11 @@ public class ObfuscatorMethods extends Obfuscator {
         }
     }
 
+    /**
+     * Goes through the method's instructions for method calls and lambdas
+     * @param method instance of the method we're searching
+     * @param map ClassMap instance
+     */
     private void obfuscateInstructions(MethodNode method, ClassMap map) {
         final InsnList array = method.instructions;
 

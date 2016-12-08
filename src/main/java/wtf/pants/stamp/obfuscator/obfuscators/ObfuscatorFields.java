@@ -23,7 +23,12 @@ public class ObfuscatorFields extends Obfuscator {
         this.cc = cc;
     }
 
-    private void searchInstructions(ClassNode cn, MethodNode methodNode) {
+    /**
+     * Searches a method's instructions for field nodes and renames them to the assigned obfuscated names
+     * @param cn ClassNode
+     * @param methodNode MethodNode to search
+     */
+    private void searchMethodInsn(ClassNode cn, MethodNode methodNode) {
         if (methodNode.instructions == null) {
             return;
         }
@@ -67,7 +72,7 @@ public class ObfuscatorFields extends Obfuscator {
 
         if (cn.methods != null) {
             final List<MethodNode> methodNodes = cn.methods;
-            methodNodes.forEach(methodNode -> searchInstructions(cn, methodNode));
+            methodNodes.forEach(methodNode -> searchMethodInsn(cn, methodNode));
         }
     }
 }

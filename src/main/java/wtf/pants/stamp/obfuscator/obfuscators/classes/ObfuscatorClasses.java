@@ -42,24 +42,33 @@ public class ObfuscatorClasses extends Obfuscator {
                         .forEach(l -> l.desc = l.desc.replace(c.getClassName(), c.getObfClassName()));
             }
 
-            final InsnList insnList = methodNode.instructions;
-
-            for (int i = 0; i < insnList.size(); i++) {
-                final AbstractInsnNode node = insnList.get(i);
-
-                if (node instanceof MethodInsnNode) {
-                    insnHandler.obfuscateMethodInsn(c, (MethodInsnNode) node);
-                } else if (node instanceof FieldInsnNode) {
-                    insnHandler.obfuscateFieldInsn(c, (FieldInsnNode) node);
-                } else if (node instanceof TypeInsnNode) {
-                    insnHandler.obfuscateTypeInsn(c, (TypeInsnNode) node);
-                } else if (node instanceof FrameNode) {
-                    insnHandler.obfuscateFrameInsn(c, (FrameNode) node);
-                } else if (node instanceof InvokeDynamicInsnNode) {
-                    insnHandler.obfuscateLambda(c, (InvokeDynamicInsnNode) node);
-                }
-            }
+            searchMethodInsn(c, methodNode);
         });
+    }
+
+    /**
+     * Search the method's instructions for Methods, Fields, Types, Frames, and Lambdas
+     *
+     * @param c          ClassMap instance
+     * @param methodNode Target method to search
+     */
+    private void searchMethodInsn(ClassMap c, MethodNode methodNode) {
+        final InsnList insnList = methodNode.instructions;
+
+        for (int i = 0; i < insnList.size(); i++) {
+            final AbstractInsnNode node = insnList.get(i);
+
+            if (node instanceof MethodInsnNode)
+                insnHandler.obfuscateMethodInsn(c, (MethodInsnNode) node);
+            else if (node instanceof FieldInsnNode)
+                insnHandler.obfuscateFieldInsn(c, (FieldInsnNode) node);
+            else if (node instanceof TypeInsnNode)
+                insnHandler.obfuscateTypeInsn(c, (TypeInsnNode) node);
+            else if (node instanceof FrameNode)
+                insnHandler.obfuscateFrameInsn(c, (FrameNode) node);
+            else if (node instanceof InvokeDynamicInsnNode)
+                insnHandler.obfuscateLambda(c, (InvokeDynamicInsnNode) node);
+        }
     }
 
     private void modifyInterfaceNames(ClassNode cn) {

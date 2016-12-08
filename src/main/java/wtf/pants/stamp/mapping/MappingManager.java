@@ -35,7 +35,8 @@ public class MappingManager {
 
     /**
      * Adds methods from a class to another class
-     * @param child Child class
+     *
+     * @param child  Child class
      * @param parent Parent Class
      */
     private void addMethod(ClassMap child, ClassMap parent) {
@@ -103,7 +104,7 @@ public class MappingManager {
     }
 
     /**
-     * Maps the class file
+     * Maps the class file. Maps the methods, fields, super class, and interfaces
      *
      * @param bytecode The class file's bytes
      */
@@ -131,7 +132,8 @@ public class MappingManager {
     }
 
     /**
-     * This will iterate the files within the target jar and map them for obfuscation
+     * This will iterate through the files within the target jar and map them for obfuscation. After mapping, it will
+     * assign each mapped class and obfuscated name for later
      *
      * @param inputFile Target file
      * @throws IOException
@@ -155,7 +157,6 @@ public class MappingManager {
                 });
 
         Log.info("Assigning obfuscated names...");
-
         addParentMethods();
         obfuscationHandler.assignObfuscatedNames();
 
