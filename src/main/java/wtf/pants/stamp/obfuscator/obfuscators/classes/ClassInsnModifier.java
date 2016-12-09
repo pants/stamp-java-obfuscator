@@ -1,6 +1,7 @@
 package wtf.pants.stamp.obfuscator.obfuscators.classes;
 
 import org.objectweb.asm.Handle;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import wtf.pants.stamp.mapping.obj.ClassMap;
 
@@ -74,8 +75,20 @@ class ClassInsnModifier {
         }
     }
 
+    void obfuscateLdc(ClassMap c, LdcInsnNode ldc) {
+        if (ldc.cst instanceof Type) {
+            Type type = (Type) ldc.cst;
+            ldc.cst = Type.getType(obfuscateString(c, type.getDescriptor()));
+        }
+    }
+
     void obfuscateLambda(ClassMap c, InvokeDynamicInsnNode lambda) {
         lambda.bsm = obfuscateHandle(c, lambda.bsm);
+
+        if (lambda.desc != null) {
+            lambda.desc = obfuscateString(c, lambda.desc);
+        }
+
         //TODO: Make this recursively check the args for Object[]
         for (int i1 = 0; i1 < lambda.bsmArgs.length; i1++) {
             if (lambda.bsmArgs[i1] instanceof Handle) {
@@ -84,5 +97,5 @@ class ClassInsnModifier {
             }
         }
     }
-    
+
 }

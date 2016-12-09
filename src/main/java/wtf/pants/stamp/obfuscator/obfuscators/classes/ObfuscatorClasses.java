@@ -25,10 +25,34 @@ public class ObfuscatorClasses extends Obfuscator {
         this.insnHandler = new ClassInsnModifier();
     }
 
+    private void obfuscateExceptions(ClassMap c, MethodNode methodNode) {
+        for (int i = 0; i < methodNode.exceptions.size(); i++) {
+            if (methodNode.exceptions.get(i) instanceof String) {
+                final String exception = methodNode.exceptions.get(i).toString();
+
+                methodNode.exceptions.set(i, c.getObfClassName());
+                Log.info("Changed exception: %s -> %s", exception, c.getObfClassName());
+            }
+        }
+
+        if (methodNode.tryCatchBlocks != null) {
+            List<TryCatchBlockNode> tryCatchBlocks = methodNode.tryCatchBlocks;
+
+            tryCatchBlocks.forEach(t -> {
+                if(t.type != null)
+                    t.type = t.type.replace(c.getClassName(), c.getObfClassName());
+            });
+        }
+    }
+
     private void obfuscateMethod(MethodNode methodNode) {
         cc.getClasses().stream()
                 .filter(ClassMap::isObfuscated)
                 .forEach(c -> {
+                    if (methodNode.exceptions != null) {
+                        obfuscateExceptions(c, methodNode);
+                    }
+
                     if (methodNode.desc.contains(c.getClassName())) {
                         final String oldDesc = methodNode.desc;
 
@@ -70,6 +94,8 @@ public class ObfuscatorClasses extends Obfuscator {
                 insnHandler.obfuscateFrameInsn(c, (FrameNode) node);
             else if (node instanceof InvokeDynamicInsnNode)
                 insnHandler.obfuscateLambda(c, (InvokeDynamicInsnNode) node);
+            else if (node instanceof LdcInsnNode)
+                insnHandler.obfuscateLdc(c, (LdcInsnNode) node);
         }
     }
 
@@ -86,6 +112,22 @@ public class ObfuscatorClasses extends Obfuscator {
                 }
             }
         }
+    }
+
+    private void obfuscateFields(ClassNode cn){
+        final List<FieldNode> fieldNodes = cn.fields;
+
+        cc.getClasses().stream()
+                .filter(ClassMap::isObfuscated)
+                .forEach(c -> fieldNodes.forEach(field -> {
+                    if(field.signature != null){
+                        field.signature = field.signature.replace(c.getClassName(), c.getObfClassName());
+                    }
+
+                    if (field.desc.contains(c.getClassName())) {
+                        field.desc = field.desc.replace(c.getClassName(), c.getObfClassName());
+                    }
+                }));
     }
 
     @Override
@@ -113,15 +155,7 @@ public class ObfuscatorClasses extends Obfuscator {
             }
 
             if (cn.fields != null) {
-                final List<FieldNode> fieldNodes = cn.fields;
-
-                cc.getClasses().stream()
-                        .filter(ClassMap::isObfuscated)
-                        .forEach(c -> fieldNodes.forEach(field -> {
-                            if (field.desc.contains(c.getClassName())) {
-                                field.desc = field.desc.replace(c.getClassName(), c.getObfClassName());
-                            }
-                        }));
+                obfuscateFields(cn);
             }
 
             final List<MethodNode> methodNodes = cn.methods;
