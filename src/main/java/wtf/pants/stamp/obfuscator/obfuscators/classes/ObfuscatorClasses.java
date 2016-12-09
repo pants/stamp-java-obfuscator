@@ -26,24 +26,26 @@ public class ObfuscatorClasses extends Obfuscator {
     }
 
     private void obfuscateMethod(MethodNode methodNode) {
-        cc.getClasses().forEach(c -> {
-            if (methodNode.desc.contains(c.getClassName())) {
-                final String oldDesc = methodNode.desc;
+        cc.getClasses().stream()
+                .filter(ClassMap::isObfuscated)
+                .forEach(c -> {
+                    if (methodNode.desc.contains(c.getClassName())) {
+                        final String oldDesc = methodNode.desc;
 
-                methodNode.desc = methodNode.desc.replace(c.getClassName(), c.getObfClassName());
-                Log.info("Renamed method desc: %s -> %s", oldDesc, methodNode.desc);
-            }
+                        methodNode.desc = methodNode.desc.replace(c.getClassName(), c.getObfClassName());
+                        Log.info("Renamed method desc: %s -> %s", oldDesc, methodNode.desc);
+                    }
 
-            if (methodNode.localVariables != null) {
-                final List<LocalVariableNode> localVars = methodNode.localVariables;
+                    if (methodNode.localVariables != null) {
+                        final List<LocalVariableNode> localVars = methodNode.localVariables;
 
-                localVars.stream()
-                        .filter(l -> l.desc.contains(c.getClassName()))
-                        .forEach(l -> l.desc = l.desc.replace(c.getClassName(), c.getObfClassName()));
-            }
+                        localVars.stream()
+                                .filter(l -> l.desc.contains(c.getClassName()))
+                                .forEach(l -> l.desc = l.desc.replace(c.getClassName(), c.getObfClassName()));
+                    }
 
-            searchMethodInsn(c, methodNode);
-        });
+                    searchMethodInsn(c, methodNode);
+                });
     }
 
     /**
@@ -77,7 +79,9 @@ public class ObfuscatorClasses extends Obfuscator {
                 try {
                     String in = (String) cn.interfaces.get(i);
                     ClassMap superClass = cc.getClassMap(in);
-                    cn.interfaces.set(i, in.replace(superClass.getClassName(), superClass.getObfClassName()));
+                    if (superClass.isObfuscated()) {
+                        cn.interfaces.set(i, in.replace(superClass.getClassName(), superClass.getObfClassName()));
+                    }
                 } catch (ClassMapNotFoundException ignored) {
                 }
             }
@@ -89,13 +93,17 @@ public class ObfuscatorClasses extends Obfuscator {
         try {
             final ClassMap classMap = cc.getClassMap(cn.name);
 
-            cn.name = classMap.getObfClassName();
+            if (classMap.isObfuscated()) {
+                cn.name = classMap.getObfClassName();
+            }
 
             if (cn.superName != null) {
                 try {
                     ClassMap superClass = cc.getClassMap(cn.superName);
-                    cn.superName = superClass.getObfClassName();
-                    Log.log("Modified %s's extended class' name", classMap.getClassName());
+                    if (superClass.isObfuscated()) {
+                        cn.superName = superClass.getObfClassName();
+                        Log.log("Modified %s's extended class' name", classMap.getClassName());
+                    }
                 } catch (ClassMapNotFoundException ignored) {
                 }
             }
@@ -107,11 +115,13 @@ public class ObfuscatorClasses extends Obfuscator {
             if (cn.fields != null) {
                 final List<FieldNode> fieldNodes = cn.fields;
 
-                cc.getClasses().forEach(c -> fieldNodes.forEach(field -> {
-                    if (field.desc.contains(c.getClassName())) {
-                        field.desc = field.desc.replace(c.getClassName(), c.getObfClassName());
-                    }
-                }));
+                cc.getClasses().stream()
+                        .filter(ClassMap::isObfuscated)
+                        .forEach(c -> fieldNodes.forEach(field -> {
+                            if (field.desc.contains(c.getClassName())) {
+                                field.desc = field.desc.replace(c.getClassName(), c.getObfClassName());
+                            }
+                        }));
             }
 
             final List<MethodNode> methodNodes = cn.methods;

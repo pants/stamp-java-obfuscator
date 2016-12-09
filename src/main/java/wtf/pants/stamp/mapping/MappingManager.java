@@ -136,9 +136,9 @@ public class MappingManager {
      * assign each mapped class and obfuscated name for later
      *
      * @param inputFile Target file
-     * @throws IOException IOException
+     * @param exclusions An array of the excluded classes
      */
-    public void mapClasses(File inputFile) throws IOException {
+    public void mapClasses(File inputFile, String[] exclusions) throws IOException {
         final ZipFile zipFile = new ZipFile(inputFile);
 
         Log.info("Mapping classes...");
@@ -158,7 +158,7 @@ public class MappingManager {
 
         Log.info("Assigning obfuscated names...");
         addParentMethods();
-        obfuscationHandler.assignObfuscatedNames();
+        obfuscationHandler.assignObfuscatedNames(exclusions);
 
     }
 

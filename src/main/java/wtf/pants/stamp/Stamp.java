@@ -25,18 +25,23 @@ import java.util.zip.ZipOutputStream;
 public class Stamp {
 
     private final File inputFile, outputFile;
+    private final String[] libs;
+    private final String[] exclusions;
 
     private ObfuscatorManager obfuscatorManager;
 
     @Getter
     private ClassCollector collector;
 
-    public Stamp(File inputFile, File outputFile) {
+    public Stamp(File inputFile, File outputFile, String[] libs, String[] exclusions) {
         this.collector = new ClassCollector();
         this.obfuscatorManager = new ObfuscatorManager(this);
 
         this.inputFile = inputFile;
         this.outputFile = outputFile;
+
+        this.libs = libs;
+        this.exclusions = exclusions;
     }
 
     private byte[] modifyManifestFile(byte[] bytes) throws IOException {
@@ -50,8 +55,13 @@ public class Stamp {
                     Log.log("Found main class: %s", mainClass);
                     final ClassMap mainClassMap = collector.getClassMap(mainClass.replace(".", "/"));
 
-                    final String newLine = line.replace(mainClass, mainClassMap.getObfClassName()) + "\n";
-                    b.write(newLine.getBytes());
+                    if(mainClassMap.isObfuscated()) {
+                        final String newLine = line.replace(mainClass, mainClassMap.getObfClassName()) + "\n";
+                        b.write(newLine.getBytes());
+                    }
+                    else {
+                        b.write((line + "\n").getBytes());
+                    }
                 } else {
                     b.write((line + "\n").getBytes());
                 }
@@ -84,8 +94,8 @@ public class Stamp {
 
             Log.info("Saving: %s    (Old Name: %s)", cn.name, c.getName());
 
-            ZipUtils.addFileToZip(zipOutputStream, cn.name + ".class",
-                    c.getName().endsWith(".class") ? obfuscatedBytes : bytes);
+            byte[] classBytes = c.getName().endsWith(".class") ? obfuscatedBytes : bytes;
+            ZipUtils.addFileToZip(zipOutputStream, cn.name + ".class", classBytes);
         } else if (c.getName().endsWith("MANIFEST.MF")) {
             ZipUtils.addFileToZip(zipOutputStream, c.getName(), modifyManifestFile(bytes));
         } else {
@@ -117,7 +127,7 @@ public class Stamp {
         try {
             Log.info("Mapping classes...");
             MappingManager mappingHandler = new MappingManager(collector);
-            mappingHandler.mapClasses(inputFile);
+            mappingHandler.mapClasses(inputFile, exclusions);
 
             System.out.println("\n\n----------------------------------");
             Log.info("Obfuscating bytecode...");
@@ -181,7 +191,7 @@ public class Stamp {
         }
 
         Log.info("Obfuscating '%s' and outputting to '%s'", inputFilename, outputFilename);
-        Stamp instance = new Stamp(file, new File(outputFilename));
+        Stamp instance = new Stamp(file, new File(outputFilename), libs, exclude);
         instance.start();
     }
 

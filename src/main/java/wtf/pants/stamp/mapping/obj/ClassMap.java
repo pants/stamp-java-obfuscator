@@ -96,6 +96,10 @@ public class ClassMap {
         Log.log("+ Added Method: %s", methodObj.getFullMethod());
     }
 
+    public boolean isObfuscated() {
+        return obfClassName != null;
+    }
+
     public boolean hasParent() {
         return parent != null;
     }

@@ -23,8 +23,8 @@ public class ObfuscatorManager {
         this.obfuscatorList.add(new ObfuscatorMethods(stamp.getCollector()));
         this.obfuscatorList.add(new ObfuscatorFields(stamp.getCollector()));
         this.obfuscatorList.add(new ObfuscatorClasses(stamp.getCollector()));
-        this.obfuscatorList.add(new ObfuscatorStrings());
-        this.obfuscatorList.add(new ObfuscatorLocalVars());
+        this.obfuscatorList.add(new ObfuscatorStrings(stamp.getCollector()));
+        this.obfuscatorList.add(new ObfuscatorLocalVars(stamp.getCollector()));
     }
 
     public byte[] obfuscate(ClassReader cr, ClassNode cn) {
@@ -36,7 +36,7 @@ public class ObfuscatorManager {
                 .filter(Obfuscator::isEnabled)
                 .forEach(o -> o.obfuscate(cr, cn, 0));
 
-        Log.debug("Accepting class..");
+        Log.debug("Accepting class: %s", cn.name);
         cn.accept(cw);
         Log.debug("Accepted class");
 

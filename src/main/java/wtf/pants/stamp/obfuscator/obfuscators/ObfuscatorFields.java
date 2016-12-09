@@ -42,7 +42,7 @@ public class ObfuscatorFields extends Obfuscator {
                 FieldInsnNode fieldInsnNode = (FieldInsnNode) node;
                 try {
                     FieldObj fieldObj = cc.getClassMap(cn.name).getField(fieldInsnNode.name);
-                    if (fieldObj != null) {
+                    if (fieldObj != null && fieldObj.isObfuscated()) {
                         fieldInsnNode.name = fieldObj.getObfFieldName();
                     }
                 } catch (ClassMapNotFoundException e) {
@@ -60,7 +60,7 @@ public class ObfuscatorFields extends Obfuscator {
             list.forEach(fieldNode -> {
                 try {
                     FieldObj fieldObj = cc.getClassMap(cn.name).getField(fieldNode.name);
-                    if (fieldObj != null) {
+                    if (fieldObj != null && fieldObj.isObfuscated()) {
                         Log.log("[field] Obfuscated %s -> %s", fieldObj.getObfFieldName(), fieldNode.name);
                         fieldNode.name = fieldObj.getObfFieldName();
                     }

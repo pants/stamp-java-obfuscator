@@ -57,46 +57,61 @@ class ObfuscationAssigner {
         });
     }
 
+    private boolean isExcluded(String clazz, String[] exclusions) {
+        for (String exclusion : exclusions) {
+            if (clazz.toLowerCase().startsWith(exclusion.toLowerCase())) {
+                Log.info("Excluding %s", clazz);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Goes through the mapped classes and assigns an obfuscated name to each class for actually obfuscating
+     *
+     * @param exclusions String array of paths/classes to exclude from assigning obfuscated names
      */
-    void assignObfuscatedNames() {
-        collector.getClasses().forEach(classObj -> {
-            if (classObj.hasParent()) {
-                try {
-                    ClassMap parentClass = collector.getParent(classObj);
-                    obfuscateParentChild(parentClass, classObj);
-                } catch (ClassMapNotFoundException e) {
-                    classObj.methods.stream()
-                            .filter(methodObj -> !methodObj.isObfuscated())
-                            .forEach(m -> m.setObfuscationDisable(true));
+    void assignObfuscatedNames(String[] exclusions) {
+        collector.getClasses().stream()
+                .filter(cm -> !isExcluded(cm.getClassName(), exclusions))
+                .forEach(classObj -> {
+                    if (classObj.hasParent()) {
+                        try {
+                            ClassMap parentClass = collector.getParent(classObj);
+                            obfuscateParentChild(parentClass, classObj);
+                        } catch (ClassMapNotFoundException e) {
+                            classObj.methods.stream()
+                                    .filter(methodObj -> !methodObj.isObfuscated())
+                                    .forEach(m -> m.setObfuscationDisable(true));
 
-                    Log.log("%s's parent class not found. Parent: %s", classObj.getClassName(), classObj.getParent());
-                }
-            }
+                            Log.log("%s's parent class not found. Parent: %s", classObj.getClassName(), classObj.getParent());
+                        }
+                    }
 
-            if (classObj.hasImplementedClasses()) {
-                obfuscateInterfaceMethods(classObj);
-            }
+                    if (classObj.hasImplementedClasses()) {
+                        obfuscateInterfaceMethods(classObj);
+                    }
 
-            classObj.getMethods().stream()
-                    .filter(m -> !m.isObfuscationDisable())
-                    .filter(m -> !m.isObfuscated())
-                    .filter(MethodObj::isSafeMethod)
-                    .forEach(m -> {
-                        m.setObfMethodName(ObfUtil.getRandomObfString());
-                        Log.log("Method: %s -> %s", m.getMethodName(), m.getObfMethodName());
-                    });
+                    classObj.getMethods().stream()
+                            .filter(m -> !m.isObfuscationDisable())
+                            .filter(m -> !m.isObfuscated())
+                            .filter(MethodObj::isSafeMethod)
+                            .forEach(m -> {
+                                m.setObfMethodName(ObfUtil.getRandomObfString());
+                                Log.log("Method: %s -> %s", m.getMethodName(), m.getObfMethodName());
+                            });
 
-            classObj.getFields().stream()
-                    .filter(f -> !f.isObfuscated())
-                    .forEach(f -> {
-                        f.setObfFieldName(ObfUtil.getRandomObfString());
-                        Log.log("Field: %s -> %s", f.getFieldName(), f.getObfFieldName());
-                    });
+                    classObj.getFields().stream()
+                            .filter(f -> !f.isObfuscated())
+                            .forEach(f -> {
+                                f.setObfFieldName(ObfUtil.getRandomObfString());
+                                Log.log("Field: %s -> %s", f.getFieldName(), f.getObfFieldName());
+                            });
 
-            classObj.setObfClassName(ObfUtil.getRandomObfString());
-        });
+                    classObj.setObfClassName(ObfUtil.getRandomObfString());
+                });
     }
 
 }

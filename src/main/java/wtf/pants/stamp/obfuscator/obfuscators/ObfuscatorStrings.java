@@ -3,6 +3,7 @@ package wtf.pants.stamp.obfuscator.obfuscators;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
+import wtf.pants.stamp.mapping.ClassCollector;
 import wtf.pants.stamp.obfuscator.Obfuscator;
 import wtf.pants.stamp.util.Log;
 import wtf.pants.stamp.util.ObfUtil;
@@ -18,8 +19,11 @@ import static org.objectweb.asm.Opcodes.*;
 @SuppressWarnings("unchecked")
 public class ObfuscatorStrings extends Obfuscator {
 
-    public ObfuscatorStrings() {
+    private final ClassCollector collector;
+
+    public ObfuscatorStrings(ClassCollector collector) {
         super("Strings", -1);
+        this.collector = collector;
     }
 
     /**
@@ -68,12 +72,17 @@ public class ObfuscatorStrings extends Obfuscator {
 
     @Override
     public void obfuscate(ClassReader classReader, ClassNode classNode, int pass) {
-        Log.log("Obfuscating strings");
+        if(!isClassObfuscated(collector, classNode))
+            return;
+
+        Log.log("Obfuscating strings in %s", classNode.name);
 
         final String stringsFieldName = ObfUtil.getRandomObfString();
         final List<String> strings = new ArrayList<>();
 
         List<MethodNode> methodNodes = classNode.methods;
+
+
 
         if ((classNode.access & ACC_INTERFACE) != 0) {
             Log.log("%s is an interface, skipping", classNode.name);
