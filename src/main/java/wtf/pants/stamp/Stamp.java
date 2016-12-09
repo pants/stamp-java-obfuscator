@@ -3,6 +3,7 @@ package wtf.pants.stamp;
 
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
+import org.apache.commons.cli.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import wtf.pants.stamp.mapping.ClassCollector;
@@ -57,7 +58,7 @@ public class Stamp {
             } catch (ClassMapNotFoundException e) {
                 Log.error("Main class does not seem to have been mapped");
                 System.exit(0);
-            } catch (IOException e){
+            } catch (IOException e) {
                 Log.error("Error writing manifest file");
                 System.exit(0);
             }
@@ -127,28 +128,61 @@ public class Stamp {
     }
 
     public static void main(String[] args) {
-        if (args.length > 0) {
-            final String inputFilename = args[0] + (args[0].toLowerCase().endsWith(".jar") ? "" : ".jar");
+        final Options options = new Options();
 
-            String outputFilename = "Obfuscated_" + inputFilename;
+        final Option inputOpt = new Option("i", "input", true, "Input file to obfuscate");
+        inputOpt.setRequired(true);
+        options.addOption(inputOpt);
 
-            if (args.length >= 2) {
-                outputFilename = args[1] + (inputFilename.toLowerCase().endsWith(".jar") ? "" : ".jar");
-            }
+        final Option outputOpt = new Option("o", "output", true, "File to output to after obfuscation");
+        options.addOption(outputOpt);
 
-            final File file = new File(inputFilename);
+        final Option libOpt = new Option("lib", "libraries", true, "Libraries that the input file uses (separator: ';')");
+        options.addOption(libOpt);
 
-            if (file.exists()) {
-                Log.info("Obfuscating '%s' and outputting to '%s'", inputFilename, outputFilename);
-                Stamp instance = new Stamp(file, new File(outputFilename));
-                instance.start();
-            } else {
-                Log.error("'%s' does not exist!", inputFilename);
-            }
+        final Option excludeOpt = new Option("x", "exclude", true, "Packages to exclude (separator: ';')");
+        options.addOption(excludeOpt);
 
-        } else {
-            System.out.println("Invalid format. --help for more info\n-\tjava -jar FILENAME.jar [input filename] <output filename>");
+        final CommandLineParser parser = new DefaultParser();
+        final HelpFormatter helpFormatter = new HelpFormatter();
+
+        final CommandLine cli;
+
+        try {
+            cli = parser.parse(options, args);
+        } catch (ParseException e) {
+            Log.error(e.getMessage());
+            helpFormatter.printHelp("stamp", options);
+            return;
         }
+
+        String inputFilename = cli.getOptionValue("input");
+        String outputFilename = cli.getOptionValue("output");
+
+        final String libVal = cli.getOptionValue("libraries");
+        final String[] libs = libVal != null ? libVal.split(";") : null;
+
+        final String exVal = cli.getOptionValue("exclude");
+        final String[] exclude = exVal != null ? exVal.split(";") : null;
+
+        if (!inputFilename.endsWith(".jar")) {
+            inputFilename += ".jar";
+        }
+
+        if (outputFilename == null) {
+            outputFilename = "Obfuscated_" + inputFilename;
+        }
+
+        final File file = new File(inputFilename);
+
+        if(!file.exists()){
+            Log.error("Input file doesn't exist: %s", inputFilename);
+            return;
+        }
+
+        Log.info("Obfuscating '%s' and outputting to '%s'", inputFilename, outputFilename);
+        Stamp instance = new Stamp(file, new File(outputFilename));
+        instance.start();
     }
 
 }
