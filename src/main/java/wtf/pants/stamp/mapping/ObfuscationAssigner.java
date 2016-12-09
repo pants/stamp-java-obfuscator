@@ -58,6 +58,9 @@ class ObfuscationAssigner {
     }
 
     private boolean isExcluded(String clazz, String[] exclusions) {
+        if(exclusions == null)
+            return false;
+
         for (String exclusion : exclusions) {
             if (clazz.toLowerCase().startsWith(exclusion.toLowerCase())) {
                 Log.info("Excluding %s", clazz);
