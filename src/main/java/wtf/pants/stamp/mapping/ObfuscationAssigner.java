@@ -9,11 +9,11 @@ import wtf.pants.stamp.util.ObfUtil;
 /**
  * @author Spacks
  */
-public class ObfuscationAssigner {
+class ObfuscationAssigner {
 
     private final ClassCollector collector;
 
-    public ObfuscationAssigner(ClassCollector cc) {
+    ObfuscationAssigner(ClassCollector cc) {
         this.collector = cc;
     }
 
@@ -60,8 +60,8 @@ public class ObfuscationAssigner {
     /**
      * Goes through the mapped classes and assigns an obfuscated name to each class for actually obfuscating
      */
-    public void assignObfuscatedNames() {
-        collector.getClasses().stream().forEach(classObj -> {
+    void assignObfuscatedNames() {
+        collector.getClasses().forEach(classObj -> {
             if (classObj.hasParent()) {
                 try {
                     ClassMap parentClass = collector.getParent(classObj);

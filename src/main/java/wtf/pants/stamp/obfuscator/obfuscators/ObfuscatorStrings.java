@@ -31,7 +31,7 @@ public class ObfuscatorStrings extends Obfuscator {
      * @param classNode  The node of the class the method is in
      * @param methodNode The method to be searched
      */
-    public void searchAndReplaceStrings(List<String> strings, String fieldName, ClassNode classNode, MethodNode methodNode) {
+    private void searchAndReplaceStrings(List<String> strings, String fieldName, ClassNode classNode, MethodNode methodNode) {
         final InsnList methodInsn = methodNode.instructions;
         final InsnList insnList = new InsnList();
 
@@ -68,56 +68,53 @@ public class ObfuscatorStrings extends Obfuscator {
 
     @Override
     public void obfuscate(ClassReader classReader, ClassNode classNode, int pass) {
-        try {
-            Log.log("Obfuscating strings");
+        Log.log("Obfuscating strings");
 
-            final String stringsFieldName = ObfUtil.getRandomObfString();
-            final List<String> strings = new ArrayList<>();
+        final String stringsFieldName = ObfUtil.getRandomObfString();
+        final List<String> strings = new ArrayList<>();
 
-            List<MethodNode> methodNodes = classNode.methods;
+        List<MethodNode> methodNodes = classNode.methods;
 
-            if ((classNode.access & ACC_INTERFACE) != 0) {
-                Log.log("%s is an interface, skipping", classNode.name);
-                return;
-            }
+        if ((classNode.access & ACC_INTERFACE) != 0) {
+            Log.log("%s is an interface, skipping", classNode.name);
+            return;
+        }
 
-            classNode.fields.add(new FieldNode(ACC_PRIVATE + ACC_STATIC, stringsFieldName, "[Ljava/lang/String;", null, null));
+        classNode.fields.add(new FieldNode(ACC_PRIVATE + ACC_STATIC, stringsFieldName, "[Ljava/lang/String;", null, null));
 
-            methodNodes.forEach(m -> searchAndReplaceStrings(strings, stringsFieldName, classNode, m));
+        methodNodes.forEach(m -> searchAndReplaceStrings(strings, stringsFieldName, classNode, m));
 
-            if (strings.size() == 0) {
-                Log.error("Class had no strings!");
-                return;
-            }
+        if (strings.size() == 0) {
+            Log.error("Class had no strings!");
+            return;
+        }
 
-            MethodNode mn = createStringMethod(strings, stringsFieldName, classNode);
+        MethodNode mn = createStringMethod(strings, stringsFieldName, classNode);
 
-            MethodNode clinit = null;
+        MethodNode clinit = null;
 
-            for (Object method : classNode.methods) {
-                if (method instanceof MethodNode) {
-                    if (((MethodNode) method).name.equals("<clinit>")) {
-                        clinit = (MethodNode) method;
-                        break;
-                    }
+        for (Object method : classNode.methods) {
+            if (method instanceof MethodNode) {
+                if (((MethodNode) method).name.equals("<clinit>")) {
+                    clinit = (MethodNode) method;
+                    break;
                 }
             }
-
-            if (clinit == null) {
-                Log.info("Adding <clinit> method");
-                classNode.methods.add(mn);
-            } else {
-                Log.error("Existing <clinit> method found! Inserting after");
-                //TODO: No idea if this works need to test it
-                clinit.instructions.add(mn.instructions);
-                return;
-            }
-
-            Log.log("Finished obfuscate strings");
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            System.out.println(classNode.name);
         }
+
+        if (clinit == null) {
+            Log.info("Adding <clinit> method");
+            classNode.methods.add(mn);
+        } else {
+            Log.error("Existing <clinit> method found! Inserting after");
+            //TODO: No idea if this works need to test it
+            if (mn != null) {
+                clinit.instructions.add(mn.instructions);
+            }
+            return;
+        }
+
+        Log.log("Finished obfuscate strings");
     }
 
     /**
@@ -128,7 +125,7 @@ public class ObfuscatorStrings extends Obfuscator {
      * @param cn        The class the method is being added to
      * @return Returns a newly created method
      */
-    public MethodNode createStringMethod(List<String> strings, String fieldName, ClassNode cn) {
+    private MethodNode createStringMethod(List<String> strings, String fieldName, ClassNode cn) {
         if (strings.size() == 0) {
             return null;
         }

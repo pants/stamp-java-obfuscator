@@ -73,10 +73,7 @@ public class ClassMap {
     public FieldObj getField(String fieldName) {
         Optional<FieldObj> fieldObj = fields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst();
 
-        if (fieldObj.isPresent())
-            return fieldObj.get();
-        else
-            return null;
+        return fieldObj.orElse(null);
     }
 
     /**

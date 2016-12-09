@@ -8,7 +8,7 @@ import wtf.pants.stamp.mapping.obj.ClassMap;
  * @author Spacks
  */
 @SuppressWarnings("unchecked")
-public class ClassInsnModifier {
+class ClassInsnModifier {
 
     private String obfuscateString(ClassMap classMap, String s) {
         return s.replace(classMap.getClassName(), classMap.getObfClassName());

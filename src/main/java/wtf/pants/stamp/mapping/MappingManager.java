@@ -136,7 +136,7 @@ public class MappingManager {
      * assign each mapped class and obfuscated name for later
      *
      * @param inputFile Target file
-     * @throws IOException
+     * @throws IOException IOException
      */
     public void mapClasses(File inputFile) throws IOException {
         final ZipFile zipFile = new ZipFile(inputFile);

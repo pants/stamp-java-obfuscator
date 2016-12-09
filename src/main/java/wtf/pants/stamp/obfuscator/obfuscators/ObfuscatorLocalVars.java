@@ -25,7 +25,7 @@ public class ObfuscatorLocalVars extends Obfuscator {
         list.forEach(m -> {
             if (m.localVariables != null) {
                 List<LocalVariableNode> local = m.localVariables;
-                local.stream().forEach(l -> l.name = ObfUtil.getRandomObfString());
+                local.forEach(l -> l.name = ObfUtil.getRandomObfString());
             }
         });
     }

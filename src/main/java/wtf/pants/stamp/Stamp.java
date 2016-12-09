@@ -14,8 +14,6 @@ import wtf.pants.stamp.util.Log;
 import wtf.pants.stamp.util.ZipUtils;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -24,8 +22,6 @@ import java.util.zip.ZipOutputStream;
  * @author Spacks
  */
 public class Stamp {
-
-    private static Stamp instance;
 
     private final File inputFile, outputFile;
 
@@ -144,7 +140,7 @@ public class Stamp {
 
             if (file.exists()) {
                 Log.info("Obfuscating '%s' and outputting to '%s'", inputFilename, outputFilename);
-                instance = new Stamp(file, new File(outputFilename));
+                Stamp instance = new Stamp(file, new File(outputFilename));
                 instance.start();
             } else {
                 Log.error("'%s' does not exist!", inputFilename);

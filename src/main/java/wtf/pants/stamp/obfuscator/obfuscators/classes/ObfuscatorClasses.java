@@ -26,7 +26,7 @@ public class ObfuscatorClasses extends Obfuscator {
     }
 
     private void obfuscateMethod(MethodNode methodNode) {
-        cc.getClasses().stream().forEach(c -> {
+        cc.getClasses().forEach(c -> {
             if (methodNode.desc.contains(c.getClassName())) {
                 final String oldDesc = methodNode.desc;
 
@@ -107,7 +107,7 @@ public class ObfuscatorClasses extends Obfuscator {
             if (cn.fields != null) {
                 final List<FieldNode> fieldNodes = cn.fields;
 
-                cc.getClasses().stream().forEach(c -> fieldNodes.forEach(field -> {
+                cc.getClasses().forEach(c -> fieldNodes.forEach(field -> {
                     if (field.desc.contains(c.getClassName())) {
                         field.desc = field.desc.replace(c.getClassName(), c.getObfClassName());
                     }
@@ -117,7 +117,7 @@ public class ObfuscatorClasses extends Obfuscator {
             final List<MethodNode> methodNodes = cn.methods;
 
             if (cn.methods != null) {
-                methodNodes.stream().forEach(this::obfuscateMethod);
+                methodNodes.forEach(this::obfuscateMethod);
             }
         } catch (ClassMapNotFoundException e) {
             e.printStackTrace();
