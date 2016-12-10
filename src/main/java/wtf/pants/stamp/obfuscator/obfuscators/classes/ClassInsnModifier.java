@@ -12,7 +12,14 @@ import wtf.pants.stamp.mapping.obj.ClassMap;
 class ClassInsnModifier {
 
     private String obfuscateString(ClassMap classMap, String s) {
-        return s.replace(classMap.getClassName(), classMap.getObfClassName());
+        final String cn = classMap.getClassName();
+        final String ob = classMap.getObfClassName();
+
+        if(cn.equalsIgnoreCase(s))
+            return ob;
+
+        return s.replace(cn + ";", ob + ";")
+                .replace(cn + ".", ob + ".");
     }
 
     private Handle obfuscateHandle(ClassMap c, Handle h) {
@@ -29,27 +36,27 @@ class ClassInsnModifier {
 
     void obfuscateMethodInsn(ClassMap c, MethodInsnNode method) {
         if (method.owner.contains(c.getClassName())) {
-            method.owner = method.owner.replace(c.getClassName(), c.getObfClassName());
+            method.owner = obfuscateString(c, method.owner);
         }
 
         if (method.desc.contains(c.getClassName())) {
-            method.desc = method.desc.replace(c.getClassName(), c.getObfClassName());
+            method.desc = obfuscateString(c, method.desc);
         }
     }
 
     void obfuscateFieldInsn(ClassMap c, FieldInsnNode field) {
         if (field.owner.contains(c.getClassName())) {
-            field.owner = field.owner.replace(c.getClassName(), c.getObfClassName());
+            field.owner = obfuscateString(c, field.owner);
         }
 
         if (field.desc.contains(c.getClassName())) {
-            field.desc = field.desc.replace(c.getClassName(), c.getObfClassName());
+            field.desc = obfuscateString(c, field.desc);
         }
     }
 
     void obfuscateTypeInsn(ClassMap c, TypeInsnNode typeInsn) {
         if (typeInsn.desc.contains(c.getClassName())) {
-            typeInsn.desc = typeInsn.desc.replace(c.getClassName(), c.getObfClassName());
+            typeInsn.desc = obfuscateString(c, typeInsn.desc);
         }
     }
 

@@ -25,6 +25,17 @@ public class ObfuscatorClasses extends Obfuscator {
         this.insnHandler = new ClassInsnModifier();
     }
 
+    private String obfuscateString(ClassMap classMap, String s) {
+        final String cn = classMap.getClassName();
+        final String ob = classMap.getObfClassName();
+
+        if(cn.equalsIgnoreCase(s))
+            return ob;
+
+        return s.replace(cn + ";", ob + ";")
+                .replace(cn + ".", ob + ".");
+    }
+
     private void obfuscateExceptions(ClassMap c, MethodNode methodNode) {
         for (int i = 0; i < methodNode.exceptions.size(); i++) {
             if (methodNode.exceptions.get(i) instanceof String) {
@@ -40,7 +51,7 @@ public class ObfuscatorClasses extends Obfuscator {
 
             tryCatchBlocks.forEach(t -> {
                 if(t.type != null)
-                    t.type = t.type.replace(c.getClassName(), c.getObfClassName());
+                    t.type = obfuscateString(c, t.type);
             });
         }
     }
@@ -56,7 +67,7 @@ public class ObfuscatorClasses extends Obfuscator {
                     if (methodNode.desc.contains(c.getClassName())) {
                         final String oldDesc = methodNode.desc;
 
-                        methodNode.desc = methodNode.desc.replace(c.getClassName(), c.getObfClassName());
+                        methodNode.desc = obfuscateString(c, methodNode.desc);
                         Log.info("Renamed method desc: %s -> %s", oldDesc, methodNode.desc);
                     }
 
@@ -65,7 +76,7 @@ public class ObfuscatorClasses extends Obfuscator {
 
                         localVars.stream()
                                 .filter(l -> l.desc.contains(c.getClassName()))
-                                .forEach(l -> l.desc = l.desc.replace(c.getClassName(), c.getObfClassName()));
+                                .forEach(l -> obfuscateString(c, l.desc));
                     }
 
                     searchMethodInsn(c, methodNode);
@@ -106,7 +117,7 @@ public class ObfuscatorClasses extends Obfuscator {
                     String in = (String) cn.interfaces.get(i);
                     ClassMap superClass = cc.getClassMap(in);
                     if (superClass.isObfuscated()) {
-                        cn.interfaces.set(i, in.replace(superClass.getClassName(), superClass.getObfClassName()));
+                        cn.interfaces.set(i, obfuscateString(superClass, in));
                     }
                 } catch (ClassMapNotFoundException ignored) {
                 }
@@ -121,11 +132,11 @@ public class ObfuscatorClasses extends Obfuscator {
                 .filter(ClassMap::isObfuscated)
                 .forEach(c -> fieldNodes.forEach(field -> {
                     if(field.signature != null){
-                        field.signature = field.signature.replace(c.getClassName(), c.getObfClassName());
+                        field.signature = obfuscateString(c, field.signature);
                     }
 
                     if (field.desc.contains(c.getClassName())) {
-                        field.desc = field.desc.replace(c.getClassName(), c.getObfClassName());
+                        field.desc = obfuscateString(c, field.desc);
                     }
                 }));
     }
