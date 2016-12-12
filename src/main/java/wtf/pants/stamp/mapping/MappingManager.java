@@ -156,6 +156,7 @@ public class MappingManager {
                     }
                 });
 
+        Log.info("Classes mapped: %s", collector.getClasses().size());
         Log.info("Assigning obfuscated names...");
         addParentMethods();
         obfuscationHandler.assignObfuscatedNames(exclusions);
