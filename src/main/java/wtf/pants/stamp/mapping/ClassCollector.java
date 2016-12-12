@@ -15,11 +15,8 @@ public class ClassCollector {
     @Getter
     private final List<ClassMap> classes;
 
-    private final List<String> classesNotFound;
-
     public ClassCollector() {
         this.classes = new ArrayList<>();
-        this.classesNotFound = new ArrayList<>();
     }
 
     /**
@@ -39,18 +36,12 @@ public class ClassCollector {
      * @throws ClassMapNotFoundException Exception thrown if className was not found
      */
     public ClassMap getClassMap(String className) throws ClassMapNotFoundException {
-        //TODO: Maybe get rid of this, in the end will it actually make a difference?
-        //In cases of large amounts of classes, hopefully will avoid going through many
-        if (classesNotFound.contains(className))
-            throw new ClassMapNotFoundException();
-
-        Optional<ClassMap> classMap =
+        final Optional<ClassMap> classMap =
                 classes.stream().filter(c -> c.getClassName().equals(className)).findFirst();
 
         if (classMap.isPresent()) {
             return classMap.get();
         } else {
-            classesNotFound.add(className);
             throw new ClassMapNotFoundException();
         }
     }
