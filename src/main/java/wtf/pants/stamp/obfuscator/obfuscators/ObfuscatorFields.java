@@ -4,6 +4,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.*;
 import wtf.pants.stamp.mapping.ClassCollector;
 import wtf.pants.stamp.mapping.exceptions.ClassMapNotFoundException;
+import wtf.pants.stamp.mapping.obj.ClassMap;
 import wtf.pants.stamp.mapping.obj.FieldObj;
 import wtf.pants.stamp.obfuscator.Obfuscator;
 import wtf.pants.stamp.util.Log;
@@ -41,7 +42,8 @@ public class ObfuscatorFields extends Obfuscator {
             if (node instanceof FieldInsnNode) {
                 FieldInsnNode fieldInsnNode = (FieldInsnNode) node;
                 try {
-                    FieldObj fieldObj = cc.getClassMap(cn.name).getField(fieldInsnNode.name);
+                    final FieldObj fieldObj = cc.getClassMap(fieldInsnNode.owner).getField(fieldInsnNode.name);
+
                     if (fieldObj != null && fieldObj.isObfuscated()) {
                         fieldInsnNode.name = fieldObj.getObfFieldName();
                     }
