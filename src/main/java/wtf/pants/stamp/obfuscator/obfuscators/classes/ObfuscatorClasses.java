@@ -29,7 +29,7 @@ public class ObfuscatorClasses extends Obfuscator {
         final String cn = classMap.getClassName();
         final String ob = classMap.getObfClassName();
 
-        if(cn.equalsIgnoreCase(s))
+        if (cn.equalsIgnoreCase(s))
             return ob;
 
         return s.replace(cn + ";", ob + ";")
@@ -41,8 +41,10 @@ public class ObfuscatorClasses extends Obfuscator {
             if (methodNode.exceptions.get(i) instanceof String) {
                 final String exception = methodNode.exceptions.get(i).toString();
 
-                methodNode.exceptions.set(i, c.getObfClassName());
-                Log.info("Changed exception: %s -> %s", exception, c.getObfClassName());
+                if (exception.contains(c.getClassName())) {
+                    methodNode.exceptions.set(i, c.getObfClassName());
+                    Log.info("Changed exception: %s -> %s", exception, c.getObfClassName());
+                }
             }
         }
 
@@ -50,7 +52,7 @@ public class ObfuscatorClasses extends Obfuscator {
             List<TryCatchBlockNode> tryCatchBlocks = methodNode.tryCatchBlocks;
 
             tryCatchBlocks.forEach(t -> {
-                if(t.type != null)
+                if (t.type != null)
                     t.type = obfuscateString(c, t.type);
             });
         }
@@ -125,13 +127,13 @@ public class ObfuscatorClasses extends Obfuscator {
         }
     }
 
-    private void obfuscateFields(ClassNode cn){
+    private void obfuscateFields(ClassNode cn) {
         final List<FieldNode> fieldNodes = cn.fields;
 
         cc.getClasses().stream()
                 .filter(ClassMap::isObfuscated)
                 .forEach(c -> fieldNodes.forEach(field -> {
-                    if(field.signature != null){
+                    if (field.signature != null) {
                         field.signature = obfuscateString(c, field.signature);
                     }
 
