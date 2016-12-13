@@ -149,7 +149,8 @@ public class ObfuscatorClasses extends Obfuscator {
             final ClassMap classMap = cc.getClassMap(cn.name);
 
             if (classMap.isObfuscated()) {
-                cn.sourceFile = null;
+                //TODO: Make this a toggle between null
+                cn.sourceFile = classMap.getObfClassName() + ".java";
                 cn.sourceDebug = null;
                 cn.name = classMap.getObfClassName();
             }
