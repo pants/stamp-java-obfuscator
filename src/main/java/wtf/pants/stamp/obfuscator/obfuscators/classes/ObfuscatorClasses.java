@@ -78,7 +78,7 @@ public class ObfuscatorClasses extends Obfuscator {
 
                         localVars.stream()
                                 .filter(l -> l.desc.contains(c.getClassName()))
-                                .forEach(l -> obfuscateString(c, l.desc));
+                                .forEach(l -> l.desc = obfuscateString(c, l.desc));
                     }
 
                     searchMethodInsn(c, methodNode);
