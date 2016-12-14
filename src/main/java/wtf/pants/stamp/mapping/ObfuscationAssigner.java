@@ -22,15 +22,19 @@ class ObfuscationAssigner {
      *
      * @param parentClass Parent Class
      * @param classObj    Child Class
+     * @param exclusions  Array of excluded classes
      */
-    private void obfuscateParentChild(ClassMap parentClass, ClassMap classObj) {
+    private void obfuscateParentChild(ClassMap parentClass, ClassMap classObj, String[] exclusions) {
         collector.getOverriddenMethods(parentClass, classObj).forEach((parentMethod, childMethod) -> {
-            if (!parentMethod.isObfuscated()) {
-                parentMethod.setObfMethodName(ObfUtil.getRandomObfString());
-            }
+            if (!isExcluded(parentClass.getClassName(), exclusions)) {
+                if (!parentMethod.isObfuscated()) {
+                    parentMethod.setObfMethodName(ObfUtil.getRandomObfString());
+                }
 
-            childMethod.setObfMethodName(parentMethod.getObfMethodName());
-            childMethod.setObfuscationDisable(false);
+                childMethod.setObfMethodName(parentMethod.getObfMethodName());
+            } else {
+                childMethod.setObfuscationDisable(true);
+            }
 
             Log.log("Obfuscated Overridden Method: %s. Renamed to: %s", childMethod.getMethodName(), childMethod.getObfMethodName());
         });
@@ -40,13 +44,14 @@ class ObfuscationAssigner {
      * Obfuscates the implemented class' overridden methods. If the implemented class is not found it will disable the
      * target class from being obfuscated. TODO: Remove the second sentence when libraries are done
      *
-     * @param classMap Instance of ClassMap
+     * @param classMap   Instance of ClassMap
+     * @param exclusions Array of excluded classes
      */
-    private void obfuscateInterfaceMethods(ClassMap classMap) {
+    private void obfuscateInterfaceMethods(ClassMap classMap, String[] exclusions) {
         classMap.getInterfaces().forEach(inter -> {
             try {
                 ClassMap interfaceClass = collector.getClassMap(inter);
-                obfuscateParentChild(interfaceClass, classMap);
+                obfuscateParentChild(interfaceClass, classMap, exclusions);
             } catch (ClassMapNotFoundException e) {
                 classMap.methods.stream()
                         .filter(methodObj -> !methodObj.isObfuscated())
@@ -57,8 +62,37 @@ class ObfuscationAssigner {
         });
     }
 
+    /**
+     * Obfuscates the paren'ts methods (recursively, if the parent has a parent)
+     *
+     * @param classObj   Instance of ClassMap
+     * @param exclusions Array of excluded classes
+     */
+    private void obfuscateParentMethods(ClassMap classObj, String[] exclusions) {
+        try {
+            ClassMap parentClass = collector.getParent(classObj);
+
+            //Recursively add parent methods
+            if (parentClass.hasParent()) {
+                obfuscateParentMethods(parentClass, exclusions);
+
+                if (parentClass.hasImplementedClasses()) {
+                    obfuscateInterfaceMethods(parentClass, exclusions);
+                }
+            }
+
+            obfuscateParentChild(parentClass, classObj, exclusions);
+        } catch (ClassMapNotFoundException e) {
+            classObj.methods.stream()
+                    .filter(methodObj -> !methodObj.isObfuscated())
+                    .forEach(m -> m.setObfuscationDisable(true));
+
+            Log.log("%s's parent class not found. Parent: %s", classObj.getClassName(), classObj.getParent());
+        }
+    }
+
     private boolean isExcluded(String clazz, String[] exclusions) {
-        if(exclusions == null)
+        if (exclusions == null)
             return false;
 
         for (String exclusion : exclusions) {
@@ -81,20 +115,11 @@ class ObfuscationAssigner {
                 .filter(cm -> !isExcluded(cm.getClassName(), exclusions))
                 .forEach(classObj -> {
                     if (classObj.hasParent()) {
-                        try {
-                            ClassMap parentClass = collector.getParent(classObj);
-                            obfuscateParentChild(parentClass, classObj);
-                        } catch (ClassMapNotFoundException e) {
-                            classObj.methods.stream()
-                                    .filter(methodObj -> !methodObj.isObfuscated())
-                                    .forEach(m -> m.setObfuscationDisable(true));
-
-                            Log.log("%s's parent class not found. Parent: %s", classObj.getClassName(), classObj.getParent());
-                        }
+                        obfuscateParentMethods(classObj, exclusions);
                     }
 
                     if (classObj.hasImplementedClasses()) {
-                        obfuscateInterfaceMethods(classObj);
+                        obfuscateInterfaceMethods(classObj, exclusions);
                     }
 
                     classObj.getMethods().stream()
