@@ -137,21 +137,29 @@ public class Stamp {
         }
     }
 
+    private static void addCliOptions(Options options){
+        options.addOption(
+                new Option("i", "input", true, "Input file to obfuscate"));
+
+        options.addOption(
+                new Option("o", "output", true, "File to output to after obfuscation"));
+
+        options.addOption(
+                new Option("lib", "libraries", true, "Libraries that the input file uses (separator: ';')"));
+
+        options.addOption(
+                new Option("x", "exclude", true, "Packages to exclude (separator: ';')"));
+
+        final Option helpOpt = new Option("help", false, "Displays possible arguments");
+        helpOpt.setOptionalArg(true);
+        options.addOption(helpOpt);
+    }
+
     public static void main(String[] args) {
+        final String usageMsg = "java -jar stamp.jar -i INPUT.jar";
+
         final Options options = new Options();
-
-        final Option inputOpt = new Option("i", "input", true, "Input file to obfuscate");
-        inputOpt.setRequired(true);
-        options.addOption(inputOpt);
-
-        final Option outputOpt = new Option("o", "output", true, "File to output to after obfuscation");
-        options.addOption(outputOpt);
-
-        final Option libOpt = new Option("lib", "libraries", true, "Libraries that the input file uses (separator: ';')");
-        options.addOption(libOpt);
-
-        final Option excludeOpt = new Option("x", "exclude", true, "Packages to exclude (separator: ';')");
-        options.addOption(excludeOpt);
+        addCliOptions(options);
 
         final CommandLineParser parser = new DefaultParser();
         final HelpFormatter helpFormatter = new HelpFormatter();
@@ -162,18 +170,22 @@ public class Stamp {
             cli = parser.parse(options, args);
         } catch (ParseException e) {
             Log.error(e.getMessage());
-            helpFormatter.printHelp("stamp", options);
+            helpFormatter.printHelp(usageMsg, options);
+            return;
+        }
+
+        if(cli.hasOption("-help")){
+            helpFormatter.printHelp("java -jar stamp.jar", options, true);
             return;
         }
 
         String inputFilename = cli.getOptionValue("input");
         String outputFilename = cli.getOptionValue("output");
 
-        final String libVal = cli.getOptionValue("libraries");
-        final String[] libs = libVal != null ? libVal.split(";") : null;
-
-        final String exVal = cli.getOptionValue("exclude");
-        final String[] exclude = exVal != null ? exVal.split(";") : null;
+        if(inputFilename == null){
+            helpFormatter.printHelp(usageMsg, options);
+            return;
+        }
 
         if (!inputFilename.endsWith(".jar")) {
             inputFilename += ".jar";
@@ -189,6 +201,13 @@ public class Stamp {
             Log.error("Input file doesn't exist: %s", inputFilename);
             return;
         }
+
+        final String libVal = cli.getOptionValue("libraries");
+        final String exVal = cli.getOptionValue("exclude");
+
+        //Correctly splits the excluded files and libs into an array
+        final String[] libs = libVal != null ? libVal.split(";") : null;
+        final String[] exclude = exVal != null ? exVal.split(";") : null;
 
         Log.info("Obfuscating '%s' and outputting to '%s'", inputFilename, outputFilename);
         Stamp instance = new Stamp(file, new File(outputFilename), libs, exclude);
