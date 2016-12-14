@@ -48,7 +48,7 @@ public class ObfuscatorFields extends Obfuscator {
                         fieldInsnNode.name = fieldObj.getObfFieldName();
                     }
                 } catch (ClassMapNotFoundException e) {
-                    Log.error("Class not found...? %s", cn.name);
+                    Log.error("Class not found...? %s", fieldInsnNode.name);
                 }
             }
         }
