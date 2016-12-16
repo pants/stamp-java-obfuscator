@@ -1,6 +1,7 @@
 package wtf.pants.stamp.asm;
 
 import lombok.Setter;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -56,6 +57,14 @@ public class ASM {
         } else {
             insn.add(new IntInsnNode(SIPUSH, i));
         }
+    }
+
+    public void ldc(String type){
+        insn.add(new LdcInsnNode(type));
+    }
+
+    public void ldcType(String type){
+        insn.add(new LdcInsnNode(Type.getType(type)));
     }
 
     public void dup() {
