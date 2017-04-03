@@ -11,10 +11,13 @@ import wtf.pants.stamp.mapping.obj.MethodObj;
 import wtf.pants.stamp.obfuscator.Obfuscator;
 import wtf.pants.stamp.util.Log;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @SuppressWarnings("unchecked")
 public class ObfuscatorMethods extends Obfuscator {
@@ -62,11 +65,26 @@ public class ObfuscatorMethods extends Obfuscator {
 
     /**
      * Goes through the method's instructions for method calls and lambdas
+     *
      * @param method instance of the method we're searching
-     * @param map ClassMap instance
+     * @param map    ClassMap instance
      */
     private void obfuscateInstructions(MethodNode method, ClassMap map) {
         final InsnList array = method.instructions;
+        final List<String> stringsToReplace = new ArrayList<>();
+
+        if (method.invisibleAnnotations != null) {
+            Iterator<AnnotationNode> annotations = method.invisibleAnnotations.iterator();
+
+            while (annotations.hasNext()) {
+                AnnotationNode annotation = annotations.next();
+
+                if (annotation.desc.equals("Lwtf/pants/stamp/annotations/StampStringRename;")) {
+                    stringsToReplace.addAll((List<String>) annotation.values.get(1));
+                    annotations.remove();
+                }
+            }
+        }
 
         for (int i = 0; i < array.size(); i++) {
             final AbstractInsnNode node = array.get(i);
@@ -76,6 +94,11 @@ public class ObfuscatorMethods extends Obfuscator {
                     modifyMethodInstruction(map, method, (MethodInsnNode) node);
                 } else if (node instanceof InvokeDynamicInsnNode) {
                     modifyLambdaInstruction(map, method, (InvokeDynamicInsnNode) node);
+                } else if (node instanceof LdcInsnNode) {
+                    LdcInsnNode ldc = (LdcInsnNode) node;
+                    if (ldc.cst instanceof String) {
+                        modifyLdcInstruction(map, method, ldc, stringsToReplace);
+                    }
                 }
             } catch (MethodNotFoundException | ClassMapNotFoundException e) {
                 //TODO Debate on printing if the method is not found.
@@ -108,6 +131,27 @@ public class ObfuscatorMethods extends Obfuscator {
 
                 final Handle newHandle = new Handle(h.getTag(), h.getOwner(), methodObj.getObfMethodName(), h.getDesc());
                 in.bsmArgs[1] = newHandle;
+            }
+        }
+    }
+
+    private void modifyLdcInstruction(ClassMap map, MethodNode method, LdcInsnNode in, List<String> strings) throws MethodNotFoundException, ClassMapNotFoundException {
+        for (String s : strings) {
+            final String owner = s.split("\\.")[0];
+            final String methodName = s.split("\\.")[1].split("\\(")[0];
+
+            if (in.cst.toString().equals(methodName)) {
+                final boolean selfMethod = owner.equals(map.getClassName());
+
+                final MethodObj methodMap =
+                        selfMethod ?
+                                map.getMethod(s) :
+                                cc.getClassMap(owner).getMethod(s);
+
+                if (methodMap.isObfuscated()) {
+                    in.cst = methodMap.getObfMethodName();
+                    return;
+                }
             }
         }
     }
