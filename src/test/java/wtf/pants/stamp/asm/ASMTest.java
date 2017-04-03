@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class ASMTest {
 

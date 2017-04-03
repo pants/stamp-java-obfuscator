@@ -7,7 +7,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class AccessUtilTest {
 
