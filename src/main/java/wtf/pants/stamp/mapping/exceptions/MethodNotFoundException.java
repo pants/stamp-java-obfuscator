@@ -1,7 +1,7 @@
 package wtf.pants.stamp.mapping.exceptions;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class MethodNotFoundException extends Exception {
     public MethodNotFoundException(String message) {

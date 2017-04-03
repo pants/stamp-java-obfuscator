@@ -11,7 +11,7 @@ import wtf.pants.stamp.util.Log;
 import java.util.List;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @SuppressWarnings("unchecked")
 public class ObfuscatorClasses extends Obfuscator {

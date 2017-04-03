@@ -8,7 +8,7 @@ import wtf.pants.stamp.mapping.obj.MethodObj;
 import java.util.*;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class ClassCollector {
 

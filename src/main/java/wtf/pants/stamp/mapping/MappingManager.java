@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.zip.ZipFile;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @SuppressWarnings("unchecked call")
 public class MappingManager {

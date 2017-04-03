@@ -5,7 +5,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class ZipUtils {
 

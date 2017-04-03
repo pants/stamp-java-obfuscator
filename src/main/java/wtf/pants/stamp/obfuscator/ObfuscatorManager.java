@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class ObfuscatorManager {
 

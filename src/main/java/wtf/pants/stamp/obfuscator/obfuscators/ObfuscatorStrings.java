@@ -14,7 +14,7 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.*;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @SuppressWarnings("unchecked")
 public class ObfuscatorStrings extends Obfuscator {

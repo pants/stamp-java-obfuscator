@@ -4,7 +4,7 @@ import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class AccessUtil {
 

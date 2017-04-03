@@ -3,7 +3,7 @@ package wtf.pants.stamp.util;
 import java.util.Random;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class ObfUtil {
 

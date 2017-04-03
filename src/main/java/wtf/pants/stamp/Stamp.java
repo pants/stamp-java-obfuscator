@@ -20,7 +20,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class Stamp {
 

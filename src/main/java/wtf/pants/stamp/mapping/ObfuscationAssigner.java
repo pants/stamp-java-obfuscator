@@ -7,7 +7,7 @@ import wtf.pants.stamp.util.Log;
 import wtf.pants.stamp.util.ObfUtil;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 class ObfuscationAssigner {
 

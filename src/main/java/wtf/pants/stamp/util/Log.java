@@ -1,7 +1,7 @@
 package wtf.pants.stamp.util;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 public class Log {
 

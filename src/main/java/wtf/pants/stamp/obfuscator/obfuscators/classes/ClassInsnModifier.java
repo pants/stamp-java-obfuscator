@@ -6,7 +6,7 @@ import org.objectweb.asm.tree.*;
 import wtf.pants.stamp.mapping.obj.ClassMap;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @SuppressWarnings("unchecked")
 class ClassInsnModifier {

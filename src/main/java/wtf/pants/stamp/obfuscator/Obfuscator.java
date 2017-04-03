@@ -10,7 +10,7 @@ import wtf.pants.stamp.mapping.exceptions.ClassMapNotFoundException;
 import wtf.pants.stamp.mapping.obj.ClassMap;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @Getter
 public abstract class Obfuscator extends ASM {
