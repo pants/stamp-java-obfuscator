@@ -5,6 +5,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
+import wtf.pants.stamp.annotations.StampPreserve;
 import wtf.pants.stamp.mapping.exceptions.ClassMapNotFoundException;
 import wtf.pants.stamp.mapping.exceptions.MethodNotFoundException;
 import wtf.pants.stamp.mapping.obj.ClassMap;
@@ -99,8 +100,11 @@ public class MappingManager {
 
         final List<MethodNode> methods = cn.methods;
 
-        methods.forEach(method ->
-                classMap.addMethod(new MethodObj(cn.name, method.name, method.desc, method.access)));
+        methods.forEach(method -> {
+            MethodObj methodObj = new MethodObj(cn.name, method.name, method.desc, method.access);
+            classMap.addMethod(methodObj);
+            methodObj.setObfuscationDisable(classMap.hasAnnotation(StampPreserve.class, method.invisibleAnnotations));
+        });
     }
 
     /**
@@ -135,7 +139,7 @@ public class MappingManager {
      * This will iterate through the files within the target jar and map them for obfuscation. After mapping, it will
      * assign each mapped class and obfuscated name for later
      *
-     * @param inputFile Target file
+     * @param inputFile  Target file
      * @param exclusions An array of the excluded classes
      */
     public void mapClasses(File inputFile, String[] exclusions) throws IOException {
