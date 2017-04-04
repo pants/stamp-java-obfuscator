@@ -1,6 +1,6 @@
 package wtf.pants.stamp.mapping;
 
-import lombok.Getter;
+import lombok.Data;
 import wtf.pants.stamp.mapping.exceptions.ClassMapNotFoundException;
 import wtf.pants.stamp.mapping.obj.ClassMap;
 import wtf.pants.stamp.mapping.obj.MethodObj;
@@ -10,10 +10,12 @@ import java.util.*;
 /**
  * @author Pants
  */
+@Data
 public class ClassCollector {
 
-    @Getter
     private final List<ClassMap> classes;
+
+    private String mainClass;
 
     public ClassCollector() {
         this.classes = new ArrayList<>();
