@@ -3,6 +3,8 @@ package wtf.pants.stamp.obfuscator.obfuscators;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.*;
+import wtf.pants.stamp.annotations.StampPack;
+import wtf.pants.stamp.annotations.StampPreserve;
 import wtf.pants.stamp.mapping.ClassCollector;
 import wtf.pants.stamp.mapping.exceptions.ClassMapNotFoundException;
 import wtf.pants.stamp.mapping.exceptions.MethodNotFoundException;
@@ -51,6 +53,9 @@ public class ObfuscatorMethods extends Obfuscator {
             final MethodObj methodObj = classMap.getMethod(methodId);
 
             Log.log("Obfuscating Method: %s", method.name);
+
+            //Removes @StampPreserve annotation
+            classMap.removeAnnotation(StampPreserve.class, method.invisibleAnnotations);
 
             obfuscateInstructions(method, classMap);
 

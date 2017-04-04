@@ -2,15 +2,19 @@ package wtf.pants.stamp.mapping.obj;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.objectweb.asm.tree.AnnotationNode;
+import org.objectweb.asm.tree.MethodNode;
+import wtf.pants.stamp.annotations.StampPreserve;
 import wtf.pants.stamp.mapping.exceptions.MethodNotFoundException;
 import wtf.pants.stamp.util.Log;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @Getter
 @Setter
@@ -23,7 +27,6 @@ public class ClassMap {
 
     private String obfClassName;
     private String parent;
-
     private List<String> interfaces;
 
     private boolean library = false;
@@ -108,4 +111,44 @@ public class ClassMap {
         return !interfaces.isEmpty();
     }
 
+    /**
+     * Checks to see if a list of available annotations provided contains an annotation class
+     * @param c Annotation class to look for
+     * @param availableAnnotations List of annotations
+     * @return Returns true if it does contain the annotation
+     */
+    public boolean hasAnnotation(Class c, List availableAnnotations) {
+        if (availableAnnotations != null) {
+            Iterator<AnnotationNode> annotations = availableAnnotations.iterator();
+
+            while (annotations.hasNext()) {
+                AnnotationNode annotation = annotations.next();
+
+                if (annotation.desc.equals("L" + c.getName().replace(".", "/") + ";")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks to see if a list of available annotations provided contains an annotation class and then removes it
+     * @param c Annotation class to look for
+     * @param availableAnnotations List of annotations
+     */
+    public void removeAnnotation(Class c, List availableAnnotations) {
+        if (availableAnnotations != null) {
+            Iterator<AnnotationNode> annotations = availableAnnotations.iterator();
+
+            while (annotations.hasNext()) {
+                AnnotationNode annotation = annotations.next();
+
+                if (annotation.desc.equals("L" + c.getName().replace(".", "/") + ";")) {
+                    annotations.remove();
+                    return;
+                }
+            }
+        }
+    }
 }
