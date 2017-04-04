@@ -5,7 +5,7 @@ import lombok.Data;
 import static wtf.pants.stamp.asm.AccessUtil.isStatic;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @Data
 public class MethodObj {

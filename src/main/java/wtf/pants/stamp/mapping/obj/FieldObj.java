@@ -3,7 +3,7 @@ package wtf.pants.stamp.mapping.obj;
 import lombok.Data;
 
 /**
- * @author Spacks
+ * @author Pants
  */
 @Data
 public class FieldObj {
