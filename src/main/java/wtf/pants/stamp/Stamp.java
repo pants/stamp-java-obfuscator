@@ -66,10 +66,10 @@ public class Stamp {
                     b.write((line + "\n").getBytes());
                 }
             } catch (ClassMapNotFoundException e) {
-                Log.error("Main class does not seem to have been mapped");
+                Log.error("Main class has not been mapped.");
                 System.exit(0);
             } catch (IOException e) {
-                Log.error("Error writing manifest file");
+                Log.error("Error writing to manifest file");
                 System.exit(0);
             }
         });
