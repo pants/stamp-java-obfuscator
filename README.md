@@ -1,2 +1,2 @@
 # Stamp Java Obfuscator
-Java bytecode obfuscator
+A Java bytecode obfuscator made by Pants
